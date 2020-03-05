@@ -21,6 +21,40 @@ ON rif.emp_no = sal.emp_no
 -- Check the table
 SELECT * FROM retiring_titles;
 
+/*-- Pratice not usedAll employees sharing the same title, grouped by title, show duplicates also
+
+SELECT retiring_titles.title, retiring_titles.first_name,
+		retiring_titles.last_name,
+		COUNT(*) OVER (PARTITION BY retiring_titles.title)
+INTO retiring_titles_duplicates
+FROM retiring_titles
+;
+
+SELECT * FROM retiring_titles_duplicates;*/
+
+-- Duplicate retiring employee records
+SELECT emp_no, first_name, last_name, COUNT(*)
+INTO duplicate_retiring_emps
+FROM retiring_titles
+GROUP BY (emp_no, first_name, last_name)
+HAVING COUNT(*)>1
+ORDER BY (first_name, last_name);
+SELECT * FROM duplicate_retiring_emps;
+
+-- Practice. Not used.
+/*
+SELECT DISTINCT tmp.emp_no, tmp.title, tmp.first_name, tmp.last_name
+INTO ret_latest_titles
+FROM 
+	(SELECT *,
+     	ROW_NUMBER()
+	  	OVER (PARTITION BY (retiring_titles.first_name, retiring_titles.last_name)
+			ORDER BY retiring_titles.from_date DESC) AS rtd
+ 		FROM retiring_titles) AS tmp
+ */
+/*	WHERE rtd.ROW_NUMBER = 1; */
+
+
 -- Exclude the rows of data containing duplicate names using PARTITION
 SELECT emp_no, first_name, last_name, title, from_date, salary
 INTO ret_latest_titles
